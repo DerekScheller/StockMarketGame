@@ -19,13 +19,13 @@ namespace StockMarketProject
                 StockProperties Stock = new StockProperties();
                 if(colData.Count() == 9)
                 {
-                    Stock.Name = colData[7] + colData[8];
+                    Stock.Name = colData[7].Trim(new char[] { '"' }) + colData[8].Trim(new char[] { '"' });
                 }
                 else
                 {
-                    Stock.Name = colData[7];
+                    Stock.Name = colData[7].Trim(new char[] { '"' });
                 }
-                Stock.Symbol = colData[0];
+                Stock.Symbol = colData[0].Trim(new char[] { '"' });
                 Stock.PreviousClose = Convert.ToDecimal(colData[1]);
                 Stock.Open = Convert.ToDecimal(colData[2]);
                 Stock.PercentFromMoveAve = Convert.ToDecimal(colData[3]);

@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace StockMarketProject
 {
-    class User
+    class User : Account
     {
         public User()
         {
-            string name;
         }
     }
 }

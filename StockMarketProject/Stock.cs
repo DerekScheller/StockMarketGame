@@ -12,12 +12,6 @@ namespace StockMarketProject
         public string symbol;
         public int quantityowned;
         public decimal price;
-        public Stock(string Name, string Symbol, int Quantityowned, decimal Price)
-        {
-           string name = Name;
-           string symbol = Symbol;
-            int quantityowned = Quantityowned;
-            decimal price = Price;
-        }
+        public bool heldShort = false;
     }
 }

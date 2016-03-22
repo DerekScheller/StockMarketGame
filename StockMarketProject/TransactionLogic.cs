@@ -6,22 +6,21 @@ using System.Threading.Tasks;
 
 namespace StockMarketProject
 {
-    public class TransactionLogic : YahooFinanceStockData
-    {   
-        public decimal BuyingSubtraction(int Quantity, decimal Price)
+    public class TransactionLogic
+    {
+        YahooFinanceStockData DataSet = new YahooFinanceStockData();
+        public void LiveDataPrint()
         {
-            decimal TotalPrice = Quantity * Price;
-            return TotalPrice;
+            DataSet.StockSelect();
         }
-        public decimal SellingAddition(int Quantity, decimal Price)
+        public void DataGenerator()
         {
-            decimal TotalGain = Quantity * Price;
-            return TotalGain;
+            DataSet.FinancialData();
         }
         public decimal GetStockPrice(string Symbol)
         {
             decimal Price = 0m;
-            foreach (StockProperties stock in Stock)
+            foreach (StockProperties stock in DataSet.YahooStockList)
             {
                 if (Symbol == stock.Symbol)
                 {
@@ -32,9 +31,9 @@ namespace StockMarketProject
         }
         public Stock TransactionReferenceCreator(string Symbol, int Quantity)
         {
-            String name;
-            decimal price;
-            foreach (StockProperties stock in Stock)
+            string name = "Error";
+            decimal price = 0m;
+            foreach (StockProperties stock in DataSet.YahooStockList)
             {
                 if (Symbol == stock.Symbol)
                 {
@@ -42,12 +41,24 @@ namespace StockMarketProject
                     price = stock.Ask;
                 }
             }
-            Stock BuiltStock = new Stock(name, Symbol, Quantity, price);
+            Stock BuiltStock = new Stock();
+            BuiltStock.name = name;
+            BuiltStock.price = price;
+            BuiltStock.symbol = Symbol;
+            BuiltStock.quantityowned = Quantity;
             return BuiltStock;
         }
-        public void SellingLogic()
+        public decimal SellingProfit(string Symbol, int Quantity)
         {
-
+            Stock CurrentData = TransactionReferenceCreator(Symbol, Quantity);
+            decimal TotalSale = CurrentData.price * Quantity;
+            return TotalSale;
+        }
+        public decimal BuyingExpense(string Symbol, int Quantity)
+        {
+            Stock CurrentData = TransactionReferenceCreator(Symbol, Quantity);
+            decimal TotalSale = CurrentData.price * Quantity;
+            return TotalSale;
         }
     }
 }

@@ -10,10 +10,8 @@ namespace StockMarketProject
     { 
         static void Main(string[] args)
         {
-            YahooFinanceStockData test = new YahooFinanceStockData();
-            test.FinancialData();
-            test.StockSelect();
-            Console.ReadLine();
+            Account test = new Account();
+            test.Transaction();
         }
     }
 }

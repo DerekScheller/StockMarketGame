@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace StockMarketProject
 {
-    class AIFinancialAnalyst
+    public class AIFinancialAnalyst
     {
+        List<Stock> AIStockPortfolio = new List<Stock>();
+        public void AIStockSelectionDecider()
+        {
 
+        }
+        
     }
 }
