@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 namespace StockMarketProject
 {
     class Program
-    { 
+    {
         static void Main(string[] args)
         {
-            Account test = new Account();
-            test.Transaction();
+            AIFinancialAnalyst test = new AIFinancialAnalyst();
+            test.AITransactionCycle();
         }
     }
 }

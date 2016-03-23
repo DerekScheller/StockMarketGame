@@ -27,7 +27,7 @@ namespace StockMarketProject
                     Price = stock.Ask;
                 }
             }
-                return Price;
+            return Price;
         }
         public Stock TransactionReferenceCreator(string Symbol, int Quantity)
         {
