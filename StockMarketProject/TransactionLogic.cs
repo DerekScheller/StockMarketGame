@@ -9,20 +9,19 @@ namespace StockMarketProject
     public class TransactionLogic
     {
         YahooFinanceStockData DataSet = new YahooFinanceStockData();
-        public void LiveDataPrint()
-        {
-            DataSet.StockSelect();
-        }
+        List<StockProperties> NewestDataPoint = new List<StockProperties>();
         public void DataGenerator()
         {
-            DataSet.FinancialData();
+            NewestDataPoint.Clear();
+            NewestDataPoint.AddRange(DataSet.SendNewestUpdate());
         }
         public decimal GetStockPrice(string Symbol)
         {
+            DataGenerator();
             decimal Price = 0m;
-            foreach (StockProperties stock in DataSet.YahooStockList)
+            foreach (StockProperties stock in NewestDataPoint)
             {
-                if (Symbol == stock.Symbol)
+                if (stock.Symbol.Contains(Symbol))
                 {
                     Price = stock.Ask;
                 }
@@ -31,11 +30,12 @@ namespace StockMarketProject
         }
         public Stock TransactionReferenceCreator(string Symbol, int Quantity)
         {
+            DataGenerator();
             string name = "Error";
             decimal price = 0m;
-            foreach (StockProperties stock in DataSet.YahooStockList)
+            foreach (StockProperties stock in NewestDataPoint)
             {
-                if (Symbol == stock.Symbol)
+                if (stock.Symbol.Contains(Symbol))
                 {
                     name = stock.Name;
                     price = stock.Ask;

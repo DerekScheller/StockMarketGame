@@ -23,5 +23,6 @@ namespace StockMarketProject
             public decimal PriceOverEPSCurrent { get; set; }
             public decimal PriceOverEPSForecast { get; set; }
             public decimal Volume { get; set; }
+            public DateTime TimeStamp { get; set; }
     }
 }

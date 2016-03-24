@@ -130,11 +130,13 @@ namespace StockMarketProject
         public void BuyAI(string Symbol)
         {
             Stock TempStock = new Stock();
-            decimal CurrentPrice = transaction.GetStockPrice(Symbol);
-            int QuantityAffordable = Convert.ToInt32(AccountBalance / CurrentPrice);
-            int Quantity = QuantityAffordable / 2;
-            AccountBalance -= transaction.BuyingExpense(Symbol, Quantity);
+            int Quantity = 0;
             TempStock = transaction.TransactionReferenceCreator(Symbol, Quantity);
+            decimal CurrentPrice = TempStock.price;
+            int QuantityAffordable = Convert.ToInt32(AccountBalance / CurrentPrice);
+            Quantity = QuantityAffordable / 2;
+            TempStock = transaction.TransactionReferenceCreator(Symbol, Quantity);
+            AccountBalance -= transaction.BuyingExpense(Symbol, Quantity);
             if (PreOwnedStock(Symbol))
             {
                 foreach (Stock stock in Portfolio)
