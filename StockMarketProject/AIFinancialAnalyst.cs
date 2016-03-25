@@ -9,13 +9,16 @@ namespace StockMarketProject
     public class AIFinancialAnalyst
     {
         Account AIAccount = new Account();
+        StatisticalEquations GetBids = new StatisticalEquations();
         YahooFinanceStockData DataSet = new YahooFinanceStockData();
         List<List<StockProperties>> FullDataToTest = new List<List<StockProperties>>();
+        List<StockProperties> NewestDataPoint = new List<StockProperties>();
+        List<Stock> BuyOrdersPlaced = new List<Stock>();
+        List<Stock> SellOrdersPlaced = new List<Stock>();
 
         public void AITransactionCycle()
         {
-            DataSet.FinancialData();
-            FullDataToTest = DataSet.SendForRegressionModel();
+            DataGenerator();
             AIStockSaleDecider();
             AIStockBuyDecider();
             PrintAIPortfolio();
@@ -27,11 +30,50 @@ namespace StockMarketProject
                 Console.WriteLine(string.Format("{0} ({1}) Price Paid: {2} Quantity Owned: {3}", stock.name, stock.symbol, stock.price, stock.quantityowned));
             }
         }
-        public void StockRanker()
+        public void SymbolSend(List<List<StockProperties>> DataToBreak)
         {
-
+            int StockCount = 0;
+            while(StockCount > 7)
+            {
+            foreach(List<StockProperties> Interval in DataToBreak)
+            {
+                foreach(StockProperties Datapoint in Interval)
+                {
+                   List<List<decimal>> TimePriceVol = new List<List<decimal>>();
+                   TimePriceVol = ListCycler(DataToBreak, Datapoint.Symbol);
+                   int Confidence = GetBids.BuyLongVsShortDeterminent(Datapoint);
+                   SendBids(Confidence, Datapoint.Symbol);
+                   StockCount++;
+                }
+            }
+            }
         }
-
+        public List<List<decimal>> ListCycler(List<List<StockProperties>> FullTestSet, string Symbol)
+        {
+            List<decimal> TimeInterval = new List<decimal>();
+            List<decimal> Price = new List<decimal>();
+            List<decimal> Volume = new List<decimal>();
+            List<decimal> ChangeDaily = new List<decimal>();
+            List<List<decimal>> ReturnForRegression = new List<List<decimal>>();
+                foreach(List<StockProperties> Intervals in FullTestSet)
+                {
+                    foreach(StockProperties datapoint in Intervals)
+                    {
+                        if(Symbol == datapoint.Symbol)
+                    {
+                        TimeInterval.Add(datapoint.TimeStamp);
+                        Price.Add(datapoint.Ask);
+                        Volume.Add(datapoint.Volume);
+                        ChangeDaily.Add(datapoint.ChangeDaily);
+                    }
+                    }
+                }
+            ReturnForRegression.Add(TimeInterval);
+            ReturnForRegression.Add(Price);
+            ReturnForRegression.Add(Volume);
+            ReturnForRegression.Add(ChangeDaily);
+            return ReturnForRegression;
+        }
 
         public void AIStockBuyDecider()
         {
@@ -41,7 +83,6 @@ namespace StockMarketProject
                 {
                     if (stock.ChangeDaily > 0)
                     {
-                        AIAccount.BuyAI(stock.Symbol);
                     }
                 }
             }
@@ -59,23 +100,23 @@ namespace StockMarketProject
                             decimal percentGross = realStockPrice.Ask - stock.price / stock.price * 100;
                             if (2 < percentGross && percentGross < 5)
                             {
-                                AIAccount.SellAI(stock.symbol, (stock.quantityowned / 2));
                             }
                             else if (percentGross > 5)
                             {
-                                AIAccount.SellAI(stock.symbol, stock.quantityowned);
+
                             }
                         }
                     }
                 }
             }
         }
-
-        List<StockProperties> NewestDataPoint = new List<StockProperties>();
         public void DataGenerator()
         {
+            DataSet.FinancialData();
             NewestDataPoint.Clear();
+            FullDataToTest.Clear();
             NewestDataPoint.AddRange(DataSet.SendNewestUpdate());
+            FullDataToTest = DataSet.SendForRegressionModel();
         }
         public decimal GetStockPrice(string Symbol)
         {
@@ -122,6 +163,34 @@ namespace StockMarketProject
             decimal TotalSale = CurrentData.price * Quantity;
             return TotalSale;
         }
+        public void SendBids(int ShortLongWeight,string Symbol,)
+        {
+            switch (ShortLongWeight)
+            {
+                case -5:
+                    stockbid1 = TransactionReferenceCreator(Symbol, (5 * 25));
+                    BuyOrdersPlaced.Add
+                case -4:
+                case -3:
+                case -2:
+                case -1:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                default:
+                    break;
+
+
+            }
+        }
+        public List<decimal> BidCreator(List<List<decimal>> StockRegressionData,  string Symbol)
+        {
+            List<decimal> ListOfBids = GetBids.ReturnNextBid(StockRegressionData[0], StockRegressionData[1]);
+            return ListOfBids;
+        }
+
     }
 }
 

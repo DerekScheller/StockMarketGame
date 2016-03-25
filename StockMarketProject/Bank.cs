@@ -8,15 +8,13 @@ namespace StockMarketProject
 {
     public class Bank
     {
-        TransactionLogic transaction = new TransactionLogic();
         public List<Stock> StocksLentShort = new List<Stock>();
-        YahooFinanceStockData StockPopList = new YahooFinanceStockData();
         public Bank()
         {
         }
-        public void LendShort(string Symbol, int Quantity)
+        public void LendShort(Stock shortAquisition)
         {
-           StocksLentShort.Add(transaction.TransactionReferenceCreator(Symbol, Quantity));
+           StocksLentShort.Add(shortAquisition);
         }
         public void ReturnReminder()
         {

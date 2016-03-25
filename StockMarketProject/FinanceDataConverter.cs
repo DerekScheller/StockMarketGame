@@ -17,11 +17,14 @@ namespace StockMarketProject
         }
         public void CsvWriter(string[] rowData)
         {
+            DateTime epoch = new DateTime(2016, 1, 1);
+            TimeSpan Difference = DateTime.Now.Subtract(epoch);
+            decimal TimeStamp = Convert.ToDecimal(Difference.TotalSeconds);
             StringBuilder csv = new StringBuilder();
             foreach (string row in rowData)
             {
                 if (string.IsNullOrEmpty(row)) continue;
-                csv.AppendLine(row + ","+ DateTime.Now);
+                csv.AppendLine(row + ","+ TimeStamp);
             }
             File.AppendAllText(@"C: \Users\Derek Scheller\Documents\Visual Studio 2015\Projects\Stock Market Project\StockDataBase.csv", csv.ToString());
         }
@@ -35,7 +38,7 @@ namespace StockMarketProject
             string line = reader.ReadLine();
             NewStockToAdd = ConvertCSV(line);
             StockValueAtInterval.Add(NewStockToAdd);
-            DateTime IntervalGroup = NewStockToAdd.TimeStamp;
+            decimal IntervalGroup = NewStockToAdd.TimeStamp;
             while (!reader.EndOfStream)
             {
                 line = reader.ReadLine();
@@ -61,12 +64,12 @@ namespace StockMarketProject
                 if (colData.Count() == 17)
                 {
                 StockToReturn.Name = colData[14].Trim(new char[] { '"' }) + colData[15].Trim(new char[] { '"' });
-                StockToReturn.TimeStamp = Convert.ToDateTime(colData[16]);
+                StockToReturn.TimeStamp = Convert.ToDecimal(colData[16]);
             }
                 else
                 {
                 StockToReturn.Name = colData[14].Trim(new char[] { '"' });
-                StockToReturn.TimeStamp = Convert.ToDateTime(colData[15]);
+                StockToReturn.TimeStamp = Convert.ToDecimal(colData[15]);
             }
             StockToReturn.Symbol = colData[0].Trim(new char[] { '"' });
             StockToReturn.PreviousClose = Convert.ToDecimal(colData[1]);
