@@ -18,6 +18,7 @@ namespace StockMarketProject
         decimal CurrentPortfolioWeight;
         public void AITransactionCycle()
         {
+            PrintAIPortfolio();
             DataGenerator();
             AttemptSale();
             MainBuyCall(FullDataToTest);
@@ -28,7 +29,23 @@ namespace StockMarketProject
         }
         public void PrintAIPortfolio()
         {
+            Console.WriteLine("Currently your portfolio make up is:");
             foreach (Stock stock in AIAccount.Portfolio)
+            {
+                Console.WriteLine(string.Format("{0} ({1}) Price Paid: {2} Quantity Owned: {3}", stock.name, stock.symbol, stock.price, stock.quantityowned));
+            }
+            Console.WriteLine("You currently have the following ShortHoldings that need to be repaid.");
+            foreach(Stock stock in AIAccount.ShortHoldings)
+            {
+                Console.WriteLine(string.Format("{0} ({1}) Price Paid: {2} Quantity Owned: {3}", stock.name, stock.symbol, stock.price, stock.quantityowned));
+            }
+            Console.WriteLine("You currently have the following pending sell bids: ");
+            foreach (Stock stock in SellOrdersPlaced)
+            {
+                Console.WriteLine(string.Format("{0} ({1}) Price Paid: {2} Quantity Owned: {3}", stock.name, stock.symbol, stock.price, stock.quantityowned));
+            }
+            Console.WriteLine("You currently have the following pending buy bids: ");
+            foreach (Stock stock in BuyOrders)
             {
                 Console.WriteLine(string.Format("{0} ({1}) Price Paid: {2} Quantity Owned: {3}", stock.name, stock.symbol, stock.price, stock.quantityowned));
             }
