@@ -19,66 +19,6 @@ namespace StockMarketProject
             finalMean = sum / GetMeanList.Count;
             return finalMean;
         }
-        public decimal MovingAverageConvergenceDivergence(List<List<StockProperties>> GetExpoList, string Symbol)
-        {
-           
-            // This needs to saved to a CSV and read over time in comparison with a Stocastic operator
-            // Once proper data update increments are implimented i will be inrimented by the value of 1 day
-            decimal newestAverage = 0m;
-            decimal oldestAverage = 0m;
-            decimal TotalSetExpoMovingAve = 0m;
-            decimal NewestSetExpoMovingAve = 0m;
-            List<StockProperties> InitialSMAList = new List<StockProperties>();
-            decimal multiplier = (2 / (GetExpoList.Count + 1));
-            int listLength = GetExpoList.Count;
-            for(int i = 0; i < 10; i++)
-            {
-                InitialSMAList = GetExpoList.ElementAt(i);
-                foreach (StockProperties SMA in InitialSMAList)
-                {
-                    if(SMA.Symbol == Symbol)
-                    {
-                        oldestAverage += SMA.Ask;
-                    }
-                }
-            }
-            oldestAverage = oldestAverage / 10;
-            TotalSetExpoMovingAve = oldestAverage;
-            for (int i = 10; i < 40; i++)
-            {
-                InitialSMAList = GetExpoList.ElementAt(listLength - i - 1);
-                foreach (StockProperties SMA in InitialSMAList)
-                {
-                    if (SMA.Symbol == Symbol)
-                    {
-                        newestAverage += SMA.Ask;
-                    }
-                }
-            }
-            newestAverage = newestAverage / 10;
-            for (int i = 0; i < 10; i++)
-            {
-                InitialSMAList = GetExpoList.ElementAt(listLength - i - 1);
-                foreach (StockProperties NewestDataPoints in InitialSMAList)
-                {
-                    if (NewestDataPoints.Symbol == Symbol)
-                    {
-                        NewestSetExpoMovingAve += ((NewestDataPoints.PreviousClose - NewestSetExpoMovingAve) * .181818m + NewestSetExpoMovingAve);
-                    }
-                }
-            }
-            foreach (List<StockProperties> Interval in GetExpoList)
-            {
-                foreach(StockProperties datapoint in Interval)
-                {
-                    if(datapoint.Symbol == Symbol)
-                    {
-                        TotalSetExpoMovingAve = ((datapoint.PreviousClose - TotalSetExpoMovingAve) * multiplier + TotalSetExpoMovingAve);
-                    }
-                }
-            }
-            return (NewestSetExpoMovingAve - TotalSetExpoMovingAve);
-        }
         public decimal WeightMean(List<decimal> NumeratorList, List<decimal> DenominatorList)
     {
         decimal numerator = 0m;
@@ -235,6 +175,66 @@ namespace StockMarketProject
                 LongShortConfidence += 1;
             }
             return LongShortConfidence;
+        }
+        public decimal MovingAverageConvergenceDivergence(List<List<StockProperties>> GetExpoList, string Symbol)
+        {
+           
+            // This needs to saved to a CSV and read over time in comparison with a Stocastic operator
+            // Once proper data update increments are implimented i will be inrimented by the value of 1 day
+            decimal newestAverage = 0m;
+            decimal oldestAverage = 0m;
+            decimal TotalSetExpoMovingAve = 0m;
+            decimal NewestSetExpoMovingAve = 0m;
+            List<StockProperties> InitialSMAList = new List<StockProperties>();
+            decimal multiplier = (2 / (GetExpoList.Count + 1));
+            int listLength = GetExpoList.Count;
+            for(int i = 0; i < 10; i++)
+            {
+                InitialSMAList = GetExpoList.ElementAt(i);
+                foreach (StockProperties SMA in InitialSMAList)
+                {
+                    if(SMA.Symbol == Symbol)
+                    {
+                        oldestAverage += SMA.Ask;
+                    }
+                }
+            }
+            oldestAverage = oldestAverage / 10;
+            TotalSetExpoMovingAve = oldestAverage;
+            for (int i = 10; i < 40; i++)
+            {
+                InitialSMAList = GetExpoList.ElementAt(listLength - i - 1);
+                foreach (StockProperties SMA in InitialSMAList)
+                {
+                    if (SMA.Symbol == Symbol)
+                    {
+                        newestAverage += SMA.Ask;
+                    }
+                }
+            }
+            newestAverage = newestAverage / 10;
+            for (int i = 0; i < 10; i++)
+            {
+                InitialSMAList = GetExpoList.ElementAt(listLength - i - 1);
+                foreach (StockProperties NewestDataPoints in InitialSMAList)
+                {
+                    if (NewestDataPoints.Symbol == Symbol)
+                    {
+                        NewestSetExpoMovingAve += ((NewestDataPoints.PreviousClose - NewestSetExpoMovingAve) * .181818m + NewestSetExpoMovingAve);
+                    }
+                }
+            }
+            foreach (List<StockProperties> Interval in GetExpoList)
+            {
+                foreach(StockProperties datapoint in Interval)
+                {
+                    if(datapoint.Symbol == Symbol)
+                    {
+                        TotalSetExpoMovingAve = ((datapoint.PreviousClose - TotalSetExpoMovingAve) * multiplier + TotalSetExpoMovingAve);
+                    }
+                }
+            }
+            return (NewestSetExpoMovingAve - TotalSetExpoMovingAve);
         }
     }
 }

@@ -3,3 +3,4 @@ C:\Users\Derek Scheller\Documents\Visual Studio 2015\Projects\Stock Market Proje
 C:\Users\Derek Scheller\Documents\Visual Studio 2015\Projects\Stock Market Project\StockMarketProject\bin\Debug\StockMarketProject.pdb
 C:\Users\Derek Scheller\Documents\Visual Studio 2015\Projects\Stock Market Project\StockMarketProject\obj\Debug\StockMarketProject.exe
 C:\Users\Derek Scheller\Documents\Visual Studio 2015\Projects\Stock Market Project\StockMarketProject\obj\Debug\StockMarketProject.pdb
+C:\Users\Derek Scheller\Documents\Visual Studio 2015\Projects\Stock Market Project\StockMarketProject\obj\Debug\StockMarketProject.csprojResolveAssemblyReference.cache

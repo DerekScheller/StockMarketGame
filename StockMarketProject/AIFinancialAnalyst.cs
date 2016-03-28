@@ -13,14 +13,17 @@ namespace StockMarketProject
         YahooFinanceStockData DataSet = new YahooFinanceStockData();
         List<List<StockProperties>> FullDataToTest = new List<List<StockProperties>>();
         List<StockProperties> NewestDataPoint = new List<StockProperties>();
-        List<Stock> BuyOrdersPlaced = new List<Stock>();
+        List<Stock> BuyOrders = new List<Stock>();
         List<Stock> SellOrdersPlaced = new List<Stock>();
-
+        decimal CurrentPortfolioWeight;
         public void AITransactionCycle()
         {
             DataGenerator();
-            AIStockSaleDecider();
-            AIStockBuyDecider();
+            AttemptSale();
+            MainBuyCall(FullDataToTest);
+            VolumeBalance();
+            MainSellCall();
+            AttemptBuy();
             PrintAIPortfolio();
         }
         public void PrintAIPortfolio()
@@ -30,22 +33,84 @@ namespace StockMarketProject
                 Console.WriteLine(string.Format("{0} ({1}) Price Paid: {2} Quantity Owned: {3}", stock.name, stock.symbol, stock.price, stock.quantityowned));
             }
         }
-        public void SymbolSend(List<List<StockProperties>> DataToBreak)
+        public void VolumeBalance()
         {
-            int StockCount = 0;
-            while(StockCount > 7)
+            decimal balance = AIAccount.AccountBalance;
+            decimal priceSum = 0m;
+            int totalVolume = 0;
+            int totalLongBuys = 0;
+            foreach (Stock buyorder in BuyOrders)
             {
-            foreach(List<StockProperties> Interval in DataToBreak)
-            {
-                foreach(StockProperties Datapoint in Interval)
+                if (!buyorder.heldShort)
                 {
-                   List<List<decimal>> TimePriceVol = new List<List<decimal>>();
-                   TimePriceVol = ListCycler(DataToBreak, Datapoint.Symbol);
-                   int Confidence = GetBids.BuyLongVsShortDeterminent(Datapoint);
-                   SendBids(Confidence, Datapoint.Symbol);
-                   StockCount++;
+                    priceSum += buyorder.price;
+                    totalLongBuys++;
                 }
             }
+            totalVolume = Convert.ToInt32(balance / priceSum);
+            int sharesPerBuy = totalVolume / totalLongBuys;
+            foreach (Stock buyorder in BuyOrders)
+            {
+                if (!buyorder.heldShort)
+                {
+                    buyorder.quantityowned = sharesPerBuy;
+                }
+            }
+        }
+        public void MainSellCall()
+        {
+            foreach (Stock buyOrder in BuyOrders)
+            {
+                Stock ProfitSale = new Stock();
+                Stock TrailingStopSale = new Stock();
+                if (!buyOrder.heldShort)
+                {
+                    ProfitSale = buyOrder;
+                    TrailingStopSale = buyOrder;
+                    ProfitSale.price += ProfitSale.price * .12m;
+                    TrailingStopSale.price -= buyOrder.price * .1m;
+                    ProfitSale.name = "Profit";
+                    TrailingStopSale.name = "Stop";
+                    SellOrdersPlaced.Add(ProfitSale);
+                    SellOrdersPlaced.Add(TrailingStopSale);
+                }
+            }
+        }
+        public void MainBuyCall(List<List<StockProperties>> DataToBreak)
+        {
+            int StockCount = 0;
+            while (StockCount > 7)
+            {
+                foreach (List<StockProperties> Interval in DataToBreak)
+                {
+                    foreach (StockProperties Datapoint in Interval)
+                    {
+                        List<decimal> bidPriceList = new List<decimal>();
+                        List<List<decimal>> TimePriceVol = new List<List<decimal>>();
+                        List<Stock> bidStockReference = new List<Stock>();
+                        int indexPosition = 0;
+                        TimePriceVol = ListCycler(DataToBreak, Datapoint.Symbol);
+                        int Confidence = GetBids.BuyLongVsShortDeterminent(Datapoint);
+                        bidPriceList = BidCreator(TimePriceVol, Datapoint.Symbol);
+                        if (RiskAssesment(Confidence))
+                        {
+                            foreach (decimal bidprice in bidPriceList)
+                            {
+                                Stock stockApprovedToBuy = new Stock();
+                                stockApprovedToBuy = TransactionReferenceCreator(Datapoint.Symbol, 0);
+                                stockApprovedToBuy.price = bidprice;
+                                if (Confidence < 0)
+                                {
+                                    stockApprovedToBuy.heldShort = true;
+                                    stockApprovedToBuy.quantityowned = 100;
+                                }
+                                BuyOrders.Add(stockApprovedToBuy);
+                                indexPosition++;
+                            }
+                        }
+                        StockCount++;
+                    }
+                }
             }
         }
         public List<List<decimal>> ListCycler(List<List<StockProperties>> FullTestSet, string Symbol)
@@ -55,60 +120,24 @@ namespace StockMarketProject
             List<decimal> Volume = new List<decimal>();
             List<decimal> ChangeDaily = new List<decimal>();
             List<List<decimal>> ReturnForRegression = new List<List<decimal>>();
-                foreach(List<StockProperties> Intervals in FullTestSet)
+            foreach (List<StockProperties> Intervals in FullTestSet)
+            {
+                foreach (StockProperties datapoint in Intervals)
                 {
-                    foreach(StockProperties datapoint in Intervals)
-                    {
-                        if(Symbol == datapoint.Symbol)
+                    if (Symbol == datapoint.Symbol)
                     {
                         TimeInterval.Add(datapoint.TimeStamp);
                         Price.Add(datapoint.Ask);
                         Volume.Add(datapoint.Volume);
                         ChangeDaily.Add(datapoint.ChangeDaily);
                     }
-                    }
                 }
+            }
             ReturnForRegression.Add(TimeInterval);
             ReturnForRegression.Add(Price);
             ReturnForRegression.Add(Volume);
             ReturnForRegression.Add(ChangeDaily);
             return ReturnForRegression;
-        }
-
-        public void AIStockBuyDecider()
-        {
-            foreach (StockProperties stock in DataSet.YahooStockList)
-            {
-                if (stock.PercentFromMoveAve > 0)
-                {
-                    if (stock.ChangeDaily > 0)
-                    {
-                    }
-                }
-            }
-        }
-        public void AIStockSaleDecider()
-        {
-            foreach (Stock stock in AIAccount.Portfolio)
-            {
-                foreach (StockProperties realStockPrice in DataSet.YahooStockList)
-                {
-                    if (stock.symbol == realStockPrice.Symbol)
-                    {
-                        if (stock.price < realStockPrice.Ask)
-                        {
-                            decimal percentGross = realStockPrice.Ask - stock.price / stock.price * 100;
-                            if (2 < percentGross && percentGross < 5)
-                            {
-                            }
-                            else if (percentGross > 5)
-                            {
-
-                            }
-                        }
-                    }
-                }
-            }
         }
         public void DataGenerator()
         {
@@ -163,36 +192,117 @@ namespace StockMarketProject
             decimal TotalSale = CurrentData.price * Quantity;
             return TotalSale;
         }
-        public void SendBids(int ShortLongWeight,string Symbol,)
+        public bool RiskAssesment(int ShortLongWeight)
         {
             switch (ShortLongWeight)
             {
                 case -5:
-                    stockbid1 = TransactionReferenceCreator(Symbol, (5 * 25));
-                    BuyOrdersPlaced.Add
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case -4:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case -3:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case -2:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case -1:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case 5:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case 6:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case 7:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case 8:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 case 9:
+                    WeightPortfolioVolumeReturn(ShortLongWeight);
+                    return true;
                 default:
-                    break;
-
-
+                    return false;
             }
         }
-        public List<decimal> BidCreator(List<List<decimal>> StockRegressionData,  string Symbol)
+        public void WeightPortfolioVolumeReturn(int Confidence)
+        {
+
+            CurrentPortfolioWeight += Confidence;
+        }
+        public List<decimal> BidCreator(List<List<decimal>> StockRegressionData, string Symbol)
         {
             List<decimal> ListOfBids = GetBids.ReturnNextBid(StockRegressionData[0], StockRegressionData[1]);
             return ListOfBids;
         }
+        public void AttemptBuy()
+        {
+            foreach (Stock buyorder in BuyOrders)
+            {
+                decimal cost = 0m;
+                if (!buyorder.heldShort)
+                {
+                    cost = BuyingExpense(buyorder.symbol, buyorder.quantityowned);
+                    AIAccount.BuyAI(buyorder, cost);
+                }
+                else
+                {
+                    cost = SellingProfit(buyorder.symbol, buyorder.quantityowned);
+                    AIAccount.SellShortAI(buyorder, cost);
+                }
+            }
+            BuyOrders.Clear();
+
+        }
+        public void AttemptSale()
+        {
+            decimal profit = 0m;
+            foreach (Stock sellOrder in SellOrdersPlaced)
+            {
+                if (sellOrder.name == "Profit")
+                {
+                    foreach (Stock ownedStock in AIAccount.Portfolio)
+                    {
+                        if (sellOrder.symbol == ownedStock.symbol)
+                        {
+                            foreach (StockProperties RealtimePrice in NewestDataPoint)
+                            {
+                                if (sellOrder.price >= RealtimePrice.Ask)
+                                {
+                                    profit = SellingProfit(sellOrder.symbol, sellOrder.quantityowned);
+                                    AIAccount.SellAI(sellOrder, profit);
+                                    SellOrdersPlaced.Remove(sellOrder);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (Stock ownedStock in AIAccount.Portfolio)
+                    {
+                        if (sellOrder.symbol == ownedStock.symbol)
+                        {
+                            foreach (StockProperties RealtimePrice in NewestDataPoint)
+                            {
+                                if (sellOrder.price <= RealtimePrice.Ask)
+                                {
+                                    profit = SellingProfit(sellOrder.symbol, sellOrder.quantityowned);
+                                    AIAccount.SellAI(sellOrder, profit);
+                                    SellOrdersPlaced.Remove(sellOrder);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
 
     }
 }
-
-
-

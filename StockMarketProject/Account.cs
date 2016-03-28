@@ -9,7 +9,7 @@ namespace StockMarketProject
     public class Account
     {
         Bank bank = new Bank();
-        decimal AccountBalance = 10000m;
+        public decimal AccountBalance = 10000m;
         public List<Stock> Portfolio = new List<Stock>();
         public List<Stock> ShortHoldings = new List<Stock>();
         public void MyPortfolioPrint()
