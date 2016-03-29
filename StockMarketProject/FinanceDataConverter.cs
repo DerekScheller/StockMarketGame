@@ -9,6 +9,7 @@ namespace StockMarketProject
 {
     public class FinanceDataConverter
     {
+        public int GroupedPullValue = 0;
         public string[] BreakToRows(string csvData)
         {
             string[] rowData = csvData.Replace("\r", "").Split('\n');
@@ -24,9 +25,10 @@ namespace StockMarketProject
             foreach (string row in rowData)
             {
                 if (string.IsNullOrEmpty(row)) continue;
-                csv.AppendLine(row + ","+ TimeStamp);
+                csv.AppendLine(row + "," + TimeStamp + "," + GroupedPullValue);
             }
             File.AppendAllText(@"C: \Users\Derek Scheller\Documents\Visual Studio 2015\Projects\Stock Market Project\StockDataBase.csv", csv.ToString());
+            GroupedPullValue++;
         }
         public List<List<StockProperties>> DatabaseGetter()
         {
@@ -38,38 +40,40 @@ namespace StockMarketProject
             string line = reader.ReadLine();
             NewStockToAdd = ConvertCSV(line);
             StockValueAtInterval.Add(NewStockToAdd);
-            decimal IntervalGroup = NewStockToAdd.TimeStamp;
+            int IntervalGroup = NewStockToAdd.PullGroup;
             while (!reader.EndOfStream)
             {
                 line = reader.ReadLine();
                 NewStockToAdd = ConvertCSV(line);
-                if (IntervalGroup == NewStockToAdd.TimeStamp)
+                if (IntervalGroup == NewStockToAdd.PullGroup)
                 {
-                StockValueAtInterval.Add(NewStockToAdd);
+                    StockValueAtInterval.Add(NewStockToAdd);
                 }
                 else
                 {
                     HistoricData.Add(StockValueAtInterval);
                     StockValueAtInterval = new List<StockProperties>();
                     StockValueAtInterval.Add(NewStockToAdd);
-                    IntervalGroup = NewStockToAdd.TimeStamp;
+                    IntervalGroup = NewStockToAdd.PullGroup;
                 }
             }
             return HistoricData;
         }
         public StockProperties ConvertCSV(string rowData)
         {
-                string[] colData = rowData.Split(',');
-                StockProperties StockToReturn = new StockProperties();
-                if (colData.Count() == 17)
-                {
+            string[] colData = rowData.Split(',');
+            StockProperties StockToReturn = new StockProperties();
+            if (colData.Count() == 18)
+            {
                 StockToReturn.Name = colData[14].Trim(new char[] { '"' }) + colData[15].Trim(new char[] { '"' });
                 StockToReturn.TimeStamp = Convert.ToDecimal(colData[16]);
+                StockToReturn.PullGroup = Convert.ToInt32(colData[17]);
             }
-                else
-                {
+            else
+            {
                 StockToReturn.Name = colData[14].Trim(new char[] { '"' });
                 StockToReturn.TimeStamp = Convert.ToDecimal(colData[15]);
+                StockToReturn.PullGroup = Convert.ToInt32(colData[16]);
             }
             StockToReturn.Symbol = colData[0].Trim(new char[] { '"' });
             StockToReturn.PreviousClose = Convert.ToDecimal(colData[1]);
@@ -78,7 +82,7 @@ namespace StockMarketProject
             StockToReturn.ChangeDaily = Convert.ToDecimal(colData[4]);
             StockToReturn.Ask = Convert.ToDecimal(colData[5]);
             StockToReturn.ShortRatio = Convert.ToDecimal(colData[6]);
-            StockToReturn.PercentChangeDaily = Convert.ToDecimal(colData[7].Trim(new char[] { '%','"' }));
+            StockToReturn.PercentChangeDaily = Convert.ToDecimal(colData[7].Trim(new char[] { '%', '"' }));
             StockToReturn.PEGRatio = Convert.ToDecimal(colData[8]);
             StockToReturn.SharesOutstanding = Convert.ToDecimal(colData[9]);
             StockToReturn.PriceOverSales = Convert.ToDecimal(colData[10]);
@@ -86,6 +90,41 @@ namespace StockMarketProject
             StockToReturn.PriceOverEPSForecast = Convert.ToDecimal(colData[12]);
             StockToReturn.Volume = Convert.ToDecimal(colData[13]);
             return StockToReturn;
+        }
+        public List<StockProperties> ConverterRawPull(string csvData)
+        {
+            List<StockProperties> stockListImport = new List<StockProperties>();
+            string[] rowData = csvData.Replace("\r", "").Split('\n');
+            foreach (string row in rowData)
+            {
+                if (string.IsNullOrEmpty(row)) continue;
+                string[] colData = row.Split(',');
+                StockProperties StockToReturn = new StockProperties();
+                if (colData.Count() == 16)
+                {
+                    StockToReturn.Name = colData[14].Trim(new char[] { '"' }) + colData[15].Trim(new char[] { '"' });
+                }
+                else
+                {
+                    StockToReturn.Name = colData[14].Trim(new char[] { '"' });
+                }
+                StockToReturn.Symbol = colData[0].Trim(new char[] { '"' });
+                StockToReturn.PreviousClose = Convert.ToDecimal(colData[1]);
+                StockToReturn.Open = Convert.ToDecimal(colData[2]);
+                StockToReturn.PercentFromMoveAve = Convert.ToDecimal(colData[3]);
+                StockToReturn.ChangeDaily = Convert.ToDecimal(colData[4]);
+                StockToReturn.Ask = Convert.ToDecimal(colData[5]);
+                StockToReturn.ShortRatio = Convert.ToDecimal(colData[6]);
+                StockToReturn.PercentChangeDaily = Convert.ToDecimal(colData[7].Trim(new char[] { '%', '"' }));
+                StockToReturn.PEGRatio = Convert.ToDecimal(colData[8]);
+                StockToReturn.SharesOutstanding = Convert.ToDecimal(colData[9]);
+                StockToReturn.PriceOverSales = Convert.ToDecimal(colData[10]);
+                StockToReturn.PriceOverEPSCurrent = Convert.ToDecimal(colData[11]);
+                StockToReturn.PriceOverEPSForecast = Convert.ToDecimal(colData[12]);
+                StockToReturn.Volume = Convert.ToDecimal(colData[13]);
+                stockListImport.Add(StockToReturn);
+            }
+            return stockListImport;
         }
     }
 }

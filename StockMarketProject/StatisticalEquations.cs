@@ -32,6 +32,27 @@ namespace StockMarketProject
         finalweightedMean = numerator / denominator;
         return finalweightedMean;
     }
+        public decimal GetListSumToPowerOf(List<decimal> SumList, int power)
+        {
+            decimal sum = 0m;
+            foreach (decimal datapoint in SumList)
+            {
+                sum += Convert.ToDecimal(Math.Pow(Convert.ToDouble(datapoint),power));
+            }
+            return sum;
+        }
+        public decimal GetTwoListSum (List<decimal> ListValueOne, List<decimal> ListValueTwo, int power)
+        {
+            decimal sumOfTwoLists = 0m;
+            int numberOfCycles = ListValueOne.Count;
+            int cycleCount = 0;
+            while (cycleCount < numberOfCycles)
+            {
+                sumOfTwoLists += Convert.ToDecimal(Math.Pow(Convert.ToDouble(ListValueOne.ElementAt(cycleCount)),power)) * ListValueTwo.ElementAt(cycleCount);
+                cycleCount++;
+            }
+            return sumOfTwoLists;
+        }
         public decimal StandardDev(List<decimal> GetStandardDevList)
         {
             decimal meanvalue = Mean(GetStandardDevList);
@@ -59,38 +80,78 @@ namespace StockMarketProject
             coVarience = numeratorSum / (ListValueOne.Count - 1);
             return coVarience;
         }
+        public decimal CorrelationCoefficientR(List<decimal> ListValueOne, List<decimal> ListValueTwo)
+        {
+            int numberOfCases = ListValueOne.Count;
+            decimal SumListOne = GetListSumToPowerOf(ListValueOne, 1);
+            decimal SumListTwo = GetListSumToPowerOf(ListValueTwo, 1);
+            decimal SumListOneSquared = GetListSumToPowerOf(ListValueOne, 2);
+            decimal SumListTwoSquared = GetListSumToPowerOf(ListValueTwo, 2);
+            decimal SumOfBothLists = GetTwoListSum(ListValueOne, ListValueTwo, 1);
+            decimal slope = 0m;
+            decimal numerator = 0m;
+            decimal denominator = 0m;
+            numerator = numberOfCases * SumOfBothLists - SumListOne * SumListTwo;
+            denominator = Convert.ToDecimal(Math.Sqrt(Convert.ToDouble(numberOfCases * SumListOneSquared - SumListOne * SumListOne))* Math.Sqrt(Convert.ToDouble(numberOfCases * SumListTwoSquared - SumListTwo * SumListTwo)));
+            slope = numerator / denominator;
+            return slope;
+        }
         public decimal SlopeReturn(List<decimal> ListValueOne, List<decimal> ListValueTwo)
         {
-            decimal meanvalueOne = Mean(ListValueOne);
-            decimal meanvalueTwo = Mean(ListValueTwo);
+            int numberOfCases = ListValueOne.Count;
+            decimal SumListOne = GetListSumToPowerOf(ListValueOne, 1);
+            decimal SumListTwo = GetListSumToPowerOf(ListValueTwo, 1);
+            decimal SumListOneSquared = GetListSumToPowerOf(ListValueOne, 2);
+            decimal SumOfBothLists = GetTwoListSum(ListValueOne, ListValueTwo, 1);
             decimal slope = 0m;
-            decimal numeratorSum = 0m;
-            decimal denominatorSum = 0m;
-            for (int i = 0; i < ListValueOne.Count; i++)
-            {
-                numeratorSum += (ListValueOne.ElementAt(i) - meanvalueOne) * (ListValueTwo.ElementAt(i) - meanvalueTwo);
-                denominatorSum += (ListValueOne.ElementAt(i) - meanvalueOne) * (ListValueOne.ElementAt(i) - meanvalueOne);
-            }
-            slope = numeratorSum / denominatorSum;
+            decimal numerator = 0m;
+            decimal denominator = 0m;
+                numerator = numberOfCases * SumOfBothLists - SumListOne * SumListTwo;
+                denominator = numberOfCases * SumListOneSquared - SumListOne * SumListOne;
+            slope = numerator / denominator;
             return slope;
         }
         public decimal InterceptReturn(List<decimal> ListValueOne, List<decimal> ListValueTwo)
         {
-            decimal meanvalueOne = Mean(ListValueOne);
-            decimal meanvalueTwo = Mean(ListValueTwo);
-            decimal Slope = SlopeReturn(ListValueOne, ListValueTwo);
-            decimal intercept = meanvalueTwo - Slope * meanvalueTwo;
+            int numberOfCases = ListValueOne.Count;
+            decimal SumListOne = GetListSumToPowerOf(ListValueOne, 1);
+            decimal SumListTwo = GetListSumToPowerOf(ListValueTwo, 1);
+            decimal SumListOneSquared = GetListSumToPowerOf(ListValueOne, 2);
+            decimal SumOfBothLists = GetTwoListSum(ListValueOne, ListValueTwo, 1);
+            decimal intercept = 0m;
+            decimal numerator = 0m;
+            decimal denominator = 0m;
+            numerator = SumListTwo * SumListOneSquared - SumListOne * SumOfBothLists;
+            denominator = numberOfCases * SumListOneSquared - SumListOne * SumListOne;
+            intercept = numerator / denominator;
             return intercept;
         }
-        public decimal EquationGuess(List<decimal> ListValueOne, List<decimal> ListValueTwo, int Multiplier)
+        public decimal EquationGuessLinearRegression(List<decimal> ListValueOne, List<decimal> ListValueTwo, int Multiplier)
         {
             decimal guess = 0m;
             decimal slope = SlopeReturn(ListValueOne,ListValueTwo);
             decimal intercept = InterceptReturn(ListValueOne,ListValueTwo);
-            guess = intercept * (slope * (ListValueOne.ElementAt(ListValueOne.Count - 1)* (60000m * Multiplier)));
+            guess = intercept + slope * (ListValueOne.ElementAt(ListValueOne.Count - 1) + (120m * Multiplier));
             return guess;
 
         }
+        //public decimal EquationGuessPolynomialRegression(List<decimal> ListValueOne, List<decimal> ListValueTwo, int Multiplier)
+        //{
+        //    decimal polynomialGuess = 0m;
+        //    decimal Anot = 0m;
+        //    decimal AOne = 0m;
+        //    decimal ATwo = 0m;
+        //    int numberOfValues = ListValueOne.Count;
+        //    decimal SumTime = GetListSumToPowerOf(ListValueOne, 1);
+        //    decimal SumTimeSquared = GetListSumToPowerOf(ListValueOne, 2);
+        //    decimal SumTimeCubed = GetListSumToPowerOf(ListValueOne, 3);
+        //    decimal SumTimeQuad = GetListSumToPowerOf(ListValueOne, 4);
+        //    decimal SumPrice = GetListSumToPowerOf(ListValueTwo, 1);
+        //    decimal SumTwolist = GetTwoListSum(ListValueOne, ListValueTwo, 1);
+        //    decimal SumTwolistTimeSquared = GetTwoListSum(ListValueOne, ListValueTwo, 2);
+        //    polynomialGuess = Anot + AOne * (ListValueOne.ElementAt(ListValueOne.Count - 1) + (120m * Multiplier)) + ATwo * Convert.ToDecimal(Math.Pow((Convert.ToDouble(ListValueOne.ElementAt(ListValueOne.Count - 1) + (120m * Multiplier))), 2));
+        //    return polynomialGuess;
+        //}
         public List<decimal> ReturnNextBid(List<decimal> ListValueOne, List<decimal> ListValueTwo)
         {
             decimal guessOne = 0m;
@@ -102,13 +163,13 @@ namespace StockMarketProject
                 switch (i)
                 {
                     case 1:
-                        guessOne = EquationGuess(ListValueOne, ListValueTwo, i);
+                        guessOne = EquationGuessLinearRegression(ListValueOne, ListValueTwo, i);
                         break;
                     case 2:
-                        guessTwo = EquationGuess(ListValueOne, ListValueTwo, i);
+                        guessTwo = EquationGuessLinearRegression(ListValueOne, ListValueTwo, i);
                         break;
                     case 3:
-                        guessThree = EquationGuess(ListValueOne, ListValueTwo, i);
+                        guessThree = EquationGuessLinearRegression(ListValueOne, ListValueTwo, i);
                         break;
                     default:
                         break;

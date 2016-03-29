@@ -24,5 +24,6 @@ namespace StockMarketProject
             public decimal PriceOverEPSForecast { get; set; }
             public decimal Volume { get; set; }
             public decimal TimeStamp { get; set; }
+            public int PullGroup { get; set; }
     }
 }

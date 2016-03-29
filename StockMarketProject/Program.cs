@@ -10,8 +10,8 @@ namespace StockMarketProject
     {
         static void Main(string[] args)
         {
-            AIFinancialAnalyst test = new AIFinancialAnalyst();
-            test.AITransactionCycle();
+            AIFinancialAnalyst TestRun = new AIFinancialAnalyst();
+            TestRun.AITransactionCycle();
         }
     }
 }

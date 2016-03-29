@@ -12,22 +12,33 @@ namespace StockMarketProject
     {
         public List<List<StockProperties>> FullDataToRegress = new List<List<StockProperties>>();
         public List<StockProperties> YahooStockList = new List<StockProperties>();
-        public void FinancialData()
+        FinanceDataConverter financeTool = new FinanceDataConverter();
+        public void MainIntervalPullToWrite()
         {
-            FinanceDataConverter financeTool = new FinanceDataConverter();
-            string FinanceDataCSV;
+            string AerospaceDefenseCSV;
             using (WebClient YahooData = new WebClient())
             {
-                FinanceDataCSV = YahooData.DownloadString("http://finance.yahoo.com/d/quotes.csv?s=JMBA+FDP+STKL+TFM+WFM+CVGW+LMNR&f=spom7c1as7p2r5j2p5r6r7vn");
+                AerospaceDefenseCSV = YahooData.DownloadString("http://finance.yahoo.com/d/quotes.csv?s=AIR+AJRD+AVAV+ATRO+BEAV+CAE+CVU+CW+DCO+ESL+HEI+HXL+KLXI+LMIA+OA+RTN+COL+SPR+TDY+TDG+TGI&f=spom7c1as7p2r5j2p5r6r7vn");
             }
             YahooStockList.Clear();
             FullDataToRegress.Clear();
-            financeTool.CsvWriter(financeTool.BreakToRows(FinanceDataCSV));
+            financeTool.CsvWriter(financeTool.BreakToRows(AerospaceDefenseCSV));
             FullDataToRegress.AddRange(financeTool.DatabaseGetter());
             YahooStockList.AddRange(FullDataToRegress.ElementAt(FullDataToRegress.Count() - 1));
         }
+        public void SecondaryPullNoWrite()
+        {
+            string RawUpdate;
+            using (WebClient RawPullForContinuedChecking = new WebClient())
+            {
+                RawUpdate = RawPullForContinuedChecking.DownloadString("http://finance.yahoo.com/d/quotes.csv?s=AIR+AJRD+AVAV+ATRO+BEAV+CAE+CVU+CW+DCO+ESL+HEI+HXL+KLXI+LMIA+OA+RTN+COL+SPR+TDY+TDG+TGI&f=spom7c1as7p2r5j2p5r6r7vn");
+            }
+            YahooStockList.Clear();
+            YahooStockList.AddRange(financeTool.ConverterRawPull(RawUpdate));
+        }
         public List<StockProperties> SendNewestUpdate()
         {
+            SecondaryPullNoWrite();
             return YahooStockList;
         }
         public List<List<StockProperties>> SendForRegressionModel()
