@@ -18,9 +18,20 @@ namespace StockMarketProject
         List<Stock> BuyOrders = new List<Stock>();
         List<Stock> SellOrdersPlaced = new List<Stock>();
         decimal CurrentPortfolioWeight;
+        public void WaitCycle()
+        {
+                int BuySellPause = 0;
+            while (BuySellPause < 10)
+            {
+                System.Threading.Thread.Sleep(60000);
+                AttemptBuy();
+                AttemptSale();
+                PrintAIPortfolio();
+                BuySellPause++;
+            }
+        }
         public void AITransactionCycle()
         {
-            int BuySellPause = 0;
             PrintAIPortfolio();
             DataGenerator();
             AttemptSale();
@@ -29,13 +40,7 @@ namespace StockMarketProject
             MainSellCall(BuyOrders);
             AttemptBuy();
             PrintAIPortfolio();
-            while (BuySellPause < 10)
-            {
-                System.Threading.Thread.Sleep(30000);
-                AttemptBuy();
-                AttemptSale();
-                PrintAIPortfolio();
-            }
+            WaitCycle();
             AITransactionCycle();
         }
         public void PrintAIPortfolio()
@@ -55,10 +60,10 @@ namespace StockMarketProject
 
             foreach (Stock stock in SellOrdersPlaced)
             {
-                if (PreOwnedStock(stock.symbol))
-                {
+              if (PreOwnedStock(stock.symbol))
+              {
                     Console.WriteLine(string.Format("Type of sell bid: {0} ({1}) Sale Price: {2} Quantity To Sell: {3}", stock.name, stock.symbol, stock.price, stock.quantityowned));
-                }
+               }
             }
             Console.WriteLine("You currently have the following pending buy bids: ");
             foreach (Stock stock in BuyOrders)
@@ -203,8 +208,6 @@ namespace StockMarketProject
         }
         public Stock TransactionReferenceCreator(string Symbol, int Quantity)
         {
-            NewestDataPoint.Clear();
-            NewestDataPoint.AddRange(DataSet.SendNewestUpdate());
             string name = "Error";
             decimal price = 0m;
             foreach (StockProperties stock in NewestDataPoint)
@@ -286,6 +289,7 @@ namespace StockMarketProject
         public void AttemptBuy()
         {
             List<StockProperties> Realtime = new List<StockProperties>();
+            List<Stock> RemoveList = new List<Stock>();
             Realtime = DataSet.SendNewestUpdate();
             foreach (Stock buyorder in BuyOrders)
             {
@@ -293,19 +297,19 @@ namespace StockMarketProject
                 {
                     if (realTimeTicker.Symbol == buyorder.symbol && realTimeTicker.Ask <= buyorder.price)
                     {
-
                         decimal cost = 0m;
                         if (!buyorder.heldShort)
                         {
                             cost = BuyingExpense(buyorder.symbol, buyorder.quantityowned);
                             BuyFinalizedAccountSend(buyorder, cost);
+                            RemoveList.Add(buyorder);
                         }
                         else
                         {
                             cost = SellingProfit(buyorder.symbol, buyorder.quantityowned);
                             SellShortAccountUpdate(buyorder, cost);
+                            RemoveList.Add(buyorder);
                         }
-                        BuyOrders.Remove(buyorder);
                     }
                 }
             }

@@ -18,7 +18,7 @@ namespace StockMarketProject
             string AerospaceDefenseCSV;
             using (WebClient YahooData = new WebClient())
             {
-                AerospaceDefenseCSV = YahooData.DownloadString("http://finance.yahoo.com/d/quotes.csv?s=AIR+AJRD+AVAV+ATRO+BEAV+CAE+CVU+CW+DCO+ESL+HEI+HXL+KLXI+LMIA+OA+RTN+COL+SPR+TDY+TDG+TGI&f=spom7c1as7p2r5j2p5r6r7vn");
+                AerospaceDefenseCSV = YahooData.DownloadString("http://finance.yahoo.com/d/quotes.csv?s=AIR+AJRD+AVAV+ATRO+BEAV+CAE+CVU+CW+DCO+ESL+HEI+HXL+KLXI+LMIA+RTN+COL+SPR+TDY+TDG+TGI&f=spom7c1as7p2r5j2p5r6r7vn");
             }
             YahooStockList.Clear();
             FullDataToRegress.Clear();
@@ -31,7 +31,7 @@ namespace StockMarketProject
             string RawUpdate;
             using (WebClient RawPullForContinuedChecking = new WebClient())
             {
-                RawUpdate = RawPullForContinuedChecking.DownloadString("http://finance.yahoo.com/d/quotes.csv?s=AIR+AJRD+AVAV+ATRO+BEAV+CAE+CVU+CW+DCO+ESL+HEI+HXL+KLXI+LMIA+OA+RTN+COL+SPR+TDY+TDG+TGI&f=spom7c1as7p2r5j2p5r6r7vn");
+                RawUpdate = RawPullForContinuedChecking.DownloadString("http://finance.yahoo.com/d/quotes.csv?s=AIR+AJRD+AVAV+ATRO+BEAV+CAE+CVU+CW+DCO+ESL+HEI+HXL+KLXI+LMIA+RTN+COL+SPR+TDY+TDG+TGI&f=spom7c1as7p2r5j2p5r6r7vn");
             }
             YahooStockList.Clear();
             YahooStockList.AddRange(financeTool.ConverterRawPull(RawUpdate));
